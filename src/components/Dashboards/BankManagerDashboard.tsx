@@ -15,12 +15,18 @@ import {
   Search,
   Target,
   AlertCircle,
-  Clock
+  Clock,
+  Filter,
+  UserCheck
 } from 'lucide-react';
 import { mockCustomers, mockLeads, mockMeetings } from '@/data/mockData';
+import AssignLeadModal from '@/components/Modals/AssignLeadModal';
 
 const BankManagerDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAssignLead, setShowAssignLead] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<{ id: string; name: string } | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const branchStats = [
     {
@@ -117,6 +123,10 @@ const BankManagerDashboard = () => {
           <p className="text-muted-foreground">Downtown Branch Operations Overview</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
+            <Filter className="w-4 h-4 mr-2" />
+            Filters
+          </Button>
           <Button variant="outline" size="sm">
             <Calendar className="w-4 h-4 mr-2" />
             This Month
@@ -127,6 +137,38 @@ const BankManagerDashboard = () => {
           </Button>
         </div>
       </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Performance</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option value="all">All Performance</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Time Period</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option value="month">This Month</option>
+                  <option value="quarter">This Quarter</option>
+                  <option value="year">This Year</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button className="w-full">Apply Filters</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search Bar */}
       <div className="relative">
@@ -418,9 +460,20 @@ const BankManagerDashboard = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
-      </Card>
-    </div>
-  );
-};
+        </Card>
 
-export default BankManagerDashboard;
+        {/* Modals */}
+        <AssignLeadModal
+          open={showAssignLead}
+          onClose={() => {
+            setShowAssignLead(false);
+            setSelectedLead(null);
+          }}
+          leadId={selectedLead?.id}
+          leadName={selectedLead?.name}
+        />
+      </div>
+    );
+  };
+  
+  export default BankManagerDashboard;

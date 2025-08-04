@@ -16,13 +16,23 @@ import {
   Bell,
   Activity,
   UserCheck,
-  Building2
+  Building2,
+  Settings,
+  FileBarChart,
+  UserPlus
 } from 'lucide-react';
 import { mockCustomers, mockLeads, mockTickets, mockActivityLogs, mockReports } from '@/data/mockData';
+import CustomerProfile from '@/components/Profiles/CustomerProfile';
+import LeadProfile from '@/components/Profiles/LeadProfile';
+import ManageUsersModal from '@/components/Modals/ManageUsersModal';
 
 const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<string | null>(null);
+  const [showManageUsers, setShowManageUsers] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const stats = [
     {
@@ -76,7 +86,15 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Complete system overview and management</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowManageUsers(true)}>
+            <Settings className="w-4 h-4 mr-2" />
+            Manage Users
+          </Button>
           <Button variant="outline" size="sm">
+            <FileBarChart className="w-4 h-4 mr-2" />
+            View Reports
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
@@ -86,6 +104,47 @@ const AdminDashboard = () => {
           </Button>
         </div>
       </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Role</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option value="all">All Roles</option>
+                  <option value="customer">Customer</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date Range</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button className="w-full">Apply Filters</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search Bar */}
       <div className="relative">
@@ -253,7 +312,11 @@ const AdminDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {mockCustomers.map((customer) => (
-                    <TableRow key={customer.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableRow 
+                      key={customer.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedCustomer(customer.id)}
+                    >
                       <TableCell className="font-medium">{customer.name}</TableCell>
                       <TableCell>{customer.accountType}</TableCell>
                       <TableCell>${customer.balance.toLocaleString()}</TableCell>
@@ -289,7 +352,11 @@ const AdminDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {mockLeads.map((lead) => (
-                    <TableRow key={lead.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableRow 
+                      key={lead.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => setSelectedLead(lead.id)}
+                    >
                       <TableCell className="font-medium">{lead.name}</TableCell>
                       <TableCell>{lead.product}</TableCell>
                       <TableCell>${lead.value.toLocaleString()}</TableCell>
@@ -387,9 +454,29 @@ const AdminDashboard = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
-      </Card>
-    </div>
-  );
-};
+        </Card>
 
-export default AdminDashboard;
+        {/* Modals */}
+        {selectedCustomer && (
+          <CustomerProfile
+            customerId={selectedCustomer}
+            onClose={() => setSelectedCustomer(null)}
+          />
+        )}
+
+        {selectedLead && (
+          <LeadProfile
+            leadId={selectedLead}
+            onClose={() => setSelectedLead(null)}
+          />
+        )}
+
+        <ManageUsersModal
+          open={showManageUsers}
+          onClose={() => setShowManageUsers(false)}
+        />
+      </div>
+    );
+  };
+  
+  export default AdminDashboard;
